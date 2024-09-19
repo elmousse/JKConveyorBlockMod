@@ -1,11 +1,13 @@
 ﻿using JumpKing.Mods;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using ConveyorBlockMod.Utils;
+using JumpKing.Level;
+using EntityComponent;
+using JumpKing.Player;
+using ConveyorBlockMod.Blocks;
 
 namespace ConveyorBlockMod
 {
-    [JumpKingMod("leomo.ConveyorBlockMod")]
+    [JumpKingMod("Mc__Ouille.ConveyorBlockMod")]
     public static class ModEntry
     {
         /// <summary>
@@ -14,7 +16,11 @@ namespace ConveyorBlockMod
         [BeforeLevelLoad]
         public static void BeforeLevelLoad()
         {
-            // Your code here
+#if DEBUG
+            Logger.EraseAll();
+            Logger.StartTimer();
+#endif
+            LevelManager.RegisterBlockFactory(new ConveyorBlockFactory());
         }
 
         /// <summary>
@@ -23,7 +29,6 @@ namespace ConveyorBlockMod
         [OnLevelUnload]
         public static void OnLevelUnload()
         {
-            // Your code here
         }
 
         /// <summary>
@@ -32,7 +37,8 @@ namespace ConveyorBlockMod
         [OnLevelStart]
         public static void OnLevelStart()
         {
-            // Your code here
+            var player = EntityManager.instance.Find<PlayerEntity>();
+            player?.m_body?.RegisterBlockBehaviour(typeof(ConveyorBlock), new ConveyorBlockBehaviour());
         }
 
         /// <summary>
