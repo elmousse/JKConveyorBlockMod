@@ -47,7 +47,6 @@ namespace ConveyorBlockMod
         [OnLevelEnd]
         public static void OnLevelEnd()
         {
-            // Your code here
         }
     }
 }
