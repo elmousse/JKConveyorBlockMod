@@ -1,5 +1,7 @@
 ﻿using JumpKing.Mods;
+#if DEBUG
 using ConveyorBlockMod.Utils;
+#endif
 using JumpKing.Level;
 using EntityComponent;
 using JumpKing.Player;
@@ -19,6 +21,7 @@ namespace ConveyorBlockMod
 #if DEBUG
             Logger.EraseAll();
             Logger.StartTimer();
+            Logger.Log("ConveyorBlockMod loaded");
 #endif
             LevelManager.RegisterBlockFactory(new ConveyorBlockFactory());
         }

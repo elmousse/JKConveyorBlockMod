@@ -6,6 +6,9 @@ using JumpKing.BodyCompBehaviours;
 using JumpKing.Level;
 using JumpKing.Player;
 using System.Linq;
+#if DEBUG
+using ConveyorBlockMod.Utils;
+#endif
 
 namespace ConveyorBlockMod.Blocks
 {
@@ -43,7 +46,9 @@ namespace ConveyorBlockMod.Blocks
             {
                 return inputXVelocity;
             }
-
+#if DEBUG
+            TriggerEnterAndExitBlockBehaviour();
+#endif
             var newXVelocity = inputXVelocity;
             if (IsPlayerOnBlock)
             {
@@ -108,9 +113,25 @@ namespace ConveyorBlockMod.Blocks
                     JumpState jumpState = behaviourTree.FindNode<JumpState>();
                     jumpState.ResetResult();
                 }
-                behaviourContext.BodyComp.Velocity.X += _collidedConveyorBlock.Speed * _collidedConveyorBlock.Direction;
+                behaviourContext.BodyComp.Velocity.X += _collidedConveyorBlock.Speed;
             }
         }
+
+#if DEBUG
+        private void TriggerEnterAndExitBlockBehaviour()
+        {
+            if (_isPlayerOnBlockLastFrame && !IsPlayerOnBlock)
+            {
+                Logger.Return();
+                Logger.Log("Exit");
+            }
+            else if (!_isPlayerOnBlockLastFrame && IsPlayerOnBlock)
+            {
+                Logger.Return();
+                Logger.Log("Enter");
+            }
+        }
+#endif
         #endregion
     }
 }
