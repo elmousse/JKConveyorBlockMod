@@ -53,7 +53,7 @@ namespace ConveyorBlockMod.Blocks
             if (IsPlayerOnBlock)
             {
                 _collidedConveyorBlock = (ConveyorBlock)behaviourContext.LastFrameCollisionInfo.PreResolutionCollisionInfo.GetCollidedBlocks<ConveyorBlock>().FirstOrDefault();
-                newXVelocity += _collidedConveyorBlock.Speed * _collidedConveyorBlock.Direction;
+                newXVelocity += _collidedConveyorBlock.Speed;
             }
             _isPlayerOnBlock2FramesBefore = _isPlayerOnBlockLastFrame;
             _isPlayerOnBlockLastFrame = IsPlayerOnBlock;
@@ -98,7 +98,7 @@ namespace ConveyorBlockMod.Blocks
         #region Private
         private bool _isPlayerOnBlockLastFrame;
         private bool _isPlayerOnBlock2FramesBefore;
-        private ConveyorBlock _collidedConveyorBlock;
+        public ConveyorBlock _collidedConveyorBlock;
 
 
         private void UpdateXVelocityIfExitingTheBlock(BehaviourContext behaviourContext)
