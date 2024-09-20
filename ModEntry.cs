@@ -6,6 +6,7 @@ using JumpKing.Level;
 using EntityComponent;
 using JumpKing.Player;
 using ConveyorBlockMod.Blocks;
+using HarmonyLib;
 
 namespace ConveyorBlockMod
 {
@@ -24,6 +25,9 @@ namespace ConveyorBlockMod
             Logger.Log("ConveyorBlockMod loaded");
 #endif
             LevelManager.RegisterBlockFactory(new ConveyorBlockFactory());
+
+            Harmony harmony = new Harmony("Mc__Ouille.ConveyorBlockMod");
+            harmony.PatchAll();
         }
 
         /// <summary>
