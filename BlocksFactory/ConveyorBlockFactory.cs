@@ -5,8 +5,9 @@ using JumpKing.Workshop;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
+using ConveyorBlockMod.Blocks;
 
-namespace ConveyorBlockMod.Blocks
+namespace ConveyorBlockMod.BlocksFactory
 {
     public class ConveyorBlockFactory : IBlockFactory
     {

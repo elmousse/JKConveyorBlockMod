@@ -6,11 +6,12 @@ using JumpKing.BodyCompBehaviours;
 using JumpKing.Level;
 using JumpKing.Player;
 using System.Linq;
+using ConveyorBlockMod.Blocks;
 #if DEBUG
 using ConveyorBlockMod.Utils;
 #endif
 
-namespace ConveyorBlockMod.Blocks
+namespace ConveyorBlockMod.BlocksBehaviour
 {
     /// <summary>
     /// An implementation of <see cref="IBlockBehaviour"/> representing how the <see cref="ConveyorBlock"/> will

@@ -6,6 +6,8 @@ using JumpKing.Level;
 using EntityComponent;
 using JumpKing.Player;
 using ConveyorBlockMod.Blocks;
+using ConveyorBlockMod.BlocksBehaviour;
+using ConveyorBlockMod.BlocksFactory;
 using HarmonyLib;
 
 namespace ConveyorBlockMod
