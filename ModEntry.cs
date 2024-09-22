@@ -28,8 +28,7 @@ namespace ConveyorBlockMod
 #endif
             LevelManager.RegisterBlockFactory(new ConveyorBlockFactory());
 
-            Harmony harmony = new Harmony("Mc__Ouille.ConveyorBlockMod");
-            harmony.PatchAll();
+            new Harmony("Mc__Ouille.ConveyorBlockMod").PatchAll();
         }
 
         /// <summary>
