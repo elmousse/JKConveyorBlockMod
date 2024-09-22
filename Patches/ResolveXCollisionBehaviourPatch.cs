@@ -10,6 +10,7 @@ using ConveyorBlockMod.Utils;
 using System.Linq;
 using ConveyorBlockMod.Blocks;
 using JumpKing.Player;
+using System;
 
 namespace ConveyorBlockMod.Patches
 {
@@ -27,9 +28,14 @@ namespace ConveyorBlockMod.Patches
 
             var bodyComp = behaviourContext.BodyComp;
             var hitbox = bodyComp.GetHitbox();
-            var collisionCheck = _m_collisionQuery.CheckCollision(hitbox, out Rectangle _, out AdvCollisionInfo advCollisionInfo);
+            var collisionCheck = _m_collisionQuery.CheckCollision(hitbox, out Rectangle overlap, out AdvCollisionInfo advCollisionInfo);
 
             var collidedSlopeBlocks = advCollisionInfo.GetCollidedBlocks<SlopeBlock>();
+
+            if (!collisionCheck)
+            {
+                return;
+            }
 
             using (LinkedList<IBlockBehaviour>.Enumerator enumerator = _m_blockBehaviours.GetEnumerator())
                 while (enumerator.MoveNext())
@@ -38,7 +44,7 @@ namespace ConveyorBlockMod.Patches
                     if (current.GetType() == typeof(ConveyorBlockBehaviour))
                     {
                         var instanceConveyorBlockBehaviour = (ConveyorBlockBehaviour)current;
-                        if (!collisionCheck || !instanceConveyorBlockBehaviour.IsPlayerOnBlock)
+                        if (!instanceConveyorBlockBehaviour.IsPlayerOnBlock)
                         {
                             return;
                         }
@@ -47,7 +53,7 @@ namespace ConveyorBlockMod.Patches
                         {
                             return;
                         }
-                        bodyComp.Position.X -= instanceConveyorBlockBehaviour._collidedConveyorBlock.Speed;
+                        bodyComp.Position.X -= overlap.Width * Math.Sign(instanceConveyorBlockBehaviour._collidedConveyorBlock.Speed);
                     }
                 }
         }
@@ -69,7 +75,7 @@ namespace ConveyorBlockMod.Patches
             {
                 return false;
             }
-            do // Move the player up the slope
+            do
             {
                 bodyComp.Position.Y -= 1;
             } while (affectingSlope.GetRect().Intersects(bodyComp.GetHitbox()));
