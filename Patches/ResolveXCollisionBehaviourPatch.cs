@@ -6,6 +6,10 @@ using JumpKing.API;
 using System.Collections.Generic;
 using ConveyorBlockMod.BlocksBehaviour;
 using System.Reflection;
+using ConveyorBlockMod.Utils;
+using System.Linq;
+using ConveyorBlockMod.Blocks;
+using JumpKing.Player;
 
 namespace ConveyorBlockMod.Patches
 {
@@ -23,7 +27,9 @@ namespace ConveyorBlockMod.Patches
 
             var bodyComp = behaviourContext.BodyComp;
             var hitbox = bodyComp.GetHitbox();
-            var collisionCheck = _m_collisionQuery.CheckCollision(hitbox, out Rectangle _, out AdvCollisionInfo _);
+            var collisionCheck = _m_collisionQuery.CheckCollision(hitbox, out Rectangle _, out AdvCollisionInfo advCollisionInfo);
+
+            var collidedSlopeBlocks = advCollisionInfo.GetCollidedBlocks<SlopeBlock>();
 
             using (LinkedList<IBlockBehaviour>.Enumerator enumerator = _m_blockBehaviours.GetEnumerator())
                 while (enumerator.MoveNext())
@@ -32,12 +38,42 @@ namespace ConveyorBlockMod.Patches
                     if (current.GetType() == typeof(ConveyorBlockBehaviour))
                     {
                         var instanceConveyorBlockBehaviour = (ConveyorBlockBehaviour)current;
-                        if (collisionCheck && instanceConveyorBlockBehaviour.IsPlayerOnBlock)
+                        if (!collisionCheck || !instanceConveyorBlockBehaviour.IsPlayerOnBlock)
                         {
-                            bodyComp.Position.X -= instanceConveyorBlockBehaviour._collidedConveyorBlock.Speed;
+                            return;
                         }
+                        var slope = UpdateXPositionIfSlopeAfterConveyorBlock(instanceConveyorBlockBehaviour._collidedConveyorBlock, collidedSlopeBlocks, bodyComp);
+                        if (slope)
+                        {
+                            return;
+                        }
+                        bodyComp.Position.X -= instanceConveyorBlockBehaviour._collidedConveyorBlock.Speed;
                     }
                 }
+        }
+        private static bool UpdateXPositionIfSlopeAfterConveyorBlock(ConveyorBlock collidedConveyorBlock, IReadOnlyList<IBlock> collidedSlopeBlocks, BodyComp bodyComp)
+        {
+            if (collidedSlopeBlocks.Count == 0)
+            {
+                return false;
+            }
+
+            var collidedConveyorBlockYPosition = collidedConveyorBlock.GetRect().Location.Y;
+            var affectingSlope = (SlopeBlock)collidedSlopeBlocks.Where(x => x.GetRect().Location.Y == (collidedConveyorBlockYPosition - 8)).FirstOrDefault();
+
+            if (affectingSlope == null)
+            {
+                return false;
+            }
+            if (!(((affectingSlope.GetSlopeType() == SlopeType.TopRight) && (collidedConveyorBlock.Speed < 0)) || ((affectingSlope.GetSlopeType() == SlopeType.TopLeft) && (collidedConveyorBlock.Speed > 0))))
+            {
+                return false;
+            }
+            do // Move the player up the slope
+            {
+                bodyComp.Position.Y -= 1;
+            } while (affectingSlope.GetRect().Intersects(bodyComp.GetHitbox()));
+            return true;
         }
     }
 }
