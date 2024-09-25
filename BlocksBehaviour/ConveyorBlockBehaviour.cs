@@ -103,7 +103,9 @@ namespace ConveyorBlockMod.BlocksBehaviour
         {
             if (!IsPlayerOnBlock && IsPlayerOnBlockLastFrame && IsPlayerOnBlock2FramesBefore && IsPlayerOnBlock3FramesBefore)
             {
-                if (behaviourContext.BodyComp.Velocity.Y >= 0)
+                var convs = behaviourContext.CollisionInfo.PreResolutionCollisionInfo.GetCollidedBlocks<ConveyorBlock>();
+                var boxes = behaviourContext.CollisionInfo.PreResolutionCollisionInfo.GetCollidedBlocks<BoxBlock>().Except(convs);
+                if (behaviourContext.BodyComp.Velocity.Y >= 0 && !boxes.Any())
                 {
                     PlayerEntity player = EntityManager.instance.Find<PlayerEntity>();
                     BehaviorTreeComp behaviourTreeComponent = player.GetComponent<BehaviorTreeComp>();
