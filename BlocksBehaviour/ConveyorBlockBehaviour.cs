@@ -7,9 +7,7 @@ using JumpKing.Level;
 using JumpKing.Player;
 using System.Linq;
 using ConveyorBlockMod.Blocks;
-#if DEBUG
-using ConveyorBlockMod.Utils;
-#endif
+using System.Collections.Generic;
 
 namespace ConveyorBlockMod.BlocksBehaviour
 {
@@ -24,6 +22,11 @@ namespace ConveyorBlockMod.BlocksBehaviour
 
         /// <inheritdoc/>
         public bool IsPlayerOnBlock { get; set; }
+        public List<bool> CachePlayerOnBlock { get; set; }
+        public bool IsPlayerOnBlockLastFrame;
+        public bool IsPlayerOnBlock2FramesBefore;
+        public bool IsPlayerOnBlock3FramesBefore;
+        public ConveyorBlock _collidedConveyorBlock;
 
         /// <inheritdoc/>
         public bool AdditionalXCollisionCheck(AdvCollisionInfo info, BehaviourContext behaviourContext)
@@ -47,17 +50,15 @@ namespace ConveyorBlockMod.BlocksBehaviour
             {
                 return inputXVelocity;
             }
-#if DEBUG
-            TriggerEnterAndExitBlockBehaviour();
-#endif
             var newXVelocity = inputXVelocity;
             if (IsPlayerOnBlock)
             {
                 _collidedConveyorBlock = (ConveyorBlock)behaviourContext.LastFrameCollisionInfo.PreResolutionCollisionInfo.GetCollidedBlocks<ConveyorBlock>().FirstOrDefault();
                 newXVelocity += _collidedConveyorBlock.Speed;
             }
-            _isPlayerOnBlock2FramesBefore = _isPlayerOnBlockLastFrame;
-            _isPlayerOnBlockLastFrame = IsPlayerOnBlock;
+            IsPlayerOnBlock3FramesBefore = IsPlayerOnBlock2FramesBefore;
+            IsPlayerOnBlock2FramesBefore = IsPlayerOnBlockLastFrame;
+            IsPlayerOnBlockLastFrame = IsPlayerOnBlock;
 
             return newXVelocity;
         }
@@ -97,14 +98,10 @@ namespace ConveyorBlockMod.BlocksBehaviour
         }
 
         #region Private
-        private bool _isPlayerOnBlockLastFrame;
-        private bool _isPlayerOnBlock2FramesBefore;
-        public ConveyorBlock _collidedConveyorBlock;
-
 
         private void UpdateXVelocityIfExitingTheBlock(BehaviourContext behaviourContext)
         {
-            if (!IsPlayerOnBlock && _isPlayerOnBlockLastFrame && _isPlayerOnBlock2FramesBefore)
+            if (!IsPlayerOnBlock && IsPlayerOnBlockLastFrame && IsPlayerOnBlock2FramesBefore && IsPlayerOnBlock3FramesBefore)
             {
                 if (behaviourContext.BodyComp.Velocity.Y >= 0)
                 {
@@ -117,22 +114,6 @@ namespace ConveyorBlockMod.BlocksBehaviour
                 behaviourContext.BodyComp.Velocity.X += _collidedConveyorBlock.Speed;
             }
         }
-
-#if DEBUG
-        private void TriggerEnterAndExitBlockBehaviour()
-        {
-            if (_isPlayerOnBlockLastFrame && !IsPlayerOnBlock)
-            {
-                Logger.Return();
-                Logger.Log("Exit");
-            }
-            else if (!_isPlayerOnBlockLastFrame && IsPlayerOnBlock)
-            {
-                Logger.Return();
-                Logger.Log("Enter");
-            }
-        }
-#endif
         #endregion
     }
 }
