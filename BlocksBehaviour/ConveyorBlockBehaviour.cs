@@ -6,8 +6,10 @@ using JumpKing.BodyCompBehaviours;
 using JumpKing.Level;
 using JumpKing.Player;
 using System.Linq;
+using ConveyorBlockMod.Blocks;
+using System.Collections.Generic;
 
-namespace ConveyorBlockMod.Blocks
+namespace ConveyorBlockMod.BlocksBehaviour
 {
     /// <summary>
     /// An implementation of <see cref="IBlockBehaviour"/> representing how the <see cref="ConveyorBlock"/> will
@@ -20,6 +22,11 @@ namespace ConveyorBlockMod.Blocks
 
         /// <inheritdoc/>
         public bool IsPlayerOnBlock { get; set; }
+        public List<bool> CachePlayerOnBlock { get; set; }
+        public bool IsPlayerOnBlockLastFrame;
+        public bool IsPlayerOnBlock2FramesBefore;
+        public bool IsPlayerOnBlock3FramesBefore;
+        public ConveyorBlock _collidedConveyorBlock;
 
         /// <inheritdoc/>
         public bool AdditionalXCollisionCheck(AdvCollisionInfo info, BehaviourContext behaviourContext)
@@ -43,15 +50,15 @@ namespace ConveyorBlockMod.Blocks
             {
                 return inputXVelocity;
             }
-
             var newXVelocity = inputXVelocity;
             if (IsPlayerOnBlock)
             {
                 _collidedConveyorBlock = (ConveyorBlock)behaviourContext.LastFrameCollisionInfo.PreResolutionCollisionInfo.GetCollidedBlocks<ConveyorBlock>().FirstOrDefault();
-                newXVelocity += _collidedConveyorBlock.Speed * _collidedConveyorBlock.Direction;
+                newXVelocity += _collidedConveyorBlock.Speed;
             }
-            _isPlayerOnBlock2FramesBefore = _isPlayerOnBlockLastFrame;
-            _isPlayerOnBlockLastFrame = IsPlayerOnBlock;
+            IsPlayerOnBlock3FramesBefore = IsPlayerOnBlock2FramesBefore;
+            IsPlayerOnBlock2FramesBefore = IsPlayerOnBlockLastFrame;
+            IsPlayerOnBlockLastFrame = IsPlayerOnBlock;
 
             return newXVelocity;
         }
@@ -91,16 +98,14 @@ namespace ConveyorBlockMod.Blocks
         }
 
         #region Private
-        private bool _isPlayerOnBlockLastFrame;
-        private bool _isPlayerOnBlock2FramesBefore;
-        private ConveyorBlock _collidedConveyorBlock;
-
 
         private void UpdateXVelocityIfExitingTheBlock(BehaviourContext behaviourContext)
         {
-            if (!IsPlayerOnBlock && _isPlayerOnBlockLastFrame && _isPlayerOnBlock2FramesBefore)
+            if (!IsPlayerOnBlock && IsPlayerOnBlockLastFrame && IsPlayerOnBlock2FramesBefore && IsPlayerOnBlock3FramesBefore)
             {
-                if (behaviourContext.BodyComp.Velocity.Y >= 0)
+                var convs = behaviourContext.CollisionInfo.PreResolutionCollisionInfo.GetCollidedBlocks<ConveyorBlock>();
+                var boxes = behaviourContext.CollisionInfo.PreResolutionCollisionInfo.GetCollidedBlocks<BoxBlock>().Except(convs);
+                if (behaviourContext.BodyComp.Velocity.Y >= 0 && !boxes.Any())
                 {
                     PlayerEntity player = EntityManager.instance.Find<PlayerEntity>();
                     BehaviorTreeComp behaviourTreeComponent = player.GetComponent<BehaviorTreeComp>();
@@ -108,7 +113,7 @@ namespace ConveyorBlockMod.Blocks
                     JumpState jumpState = behaviourTree.FindNode<JumpState>();
                     jumpState.ResetResult();
                 }
-                behaviourContext.BodyComp.Velocity.X += _collidedConveyorBlock.Speed * _collidedConveyorBlock.Direction;
+                behaviourContext.BodyComp.Velocity.X += _collidedConveyorBlock.Speed;
             }
         }
         #endregion

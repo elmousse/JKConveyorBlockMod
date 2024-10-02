@@ -7,15 +7,13 @@ namespace ConveyorBlockMod.Blocks
     {
         private readonly Rectangle m_collider;
         public float Speed { get; set; }
-        public int Direction { get; set; }
 
         public Color DebugColor => new Color(255, 100, 0);
 
         public ConveyorBlock(Rectangle p_collider, byte speed, byte direction) : base(p_collider)
         {
             m_collider = p_collider;
-            Speed = ((float)speed) / 2;
-            Direction = CalculateDirectionFromColor(direction);
+            Speed = (((float)speed) * CalculateDirectionFromColor(direction)) / 2;
         }
 
         public Rectangle GetRect()

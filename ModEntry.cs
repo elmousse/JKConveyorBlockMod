@@ -1,9 +1,11 @@
 ﻿using JumpKing.Mods;
-using ConveyorBlockMod.Utils;
 using JumpKing.Level;
 using EntityComponent;
 using JumpKing.Player;
 using ConveyorBlockMod.Blocks;
+using ConveyorBlockMod.BlocksBehaviour;
+using ConveyorBlockMod.BlocksFactory;
+using HarmonyLib;
 
 namespace ConveyorBlockMod
 {
@@ -16,11 +18,9 @@ namespace ConveyorBlockMod
         [BeforeLevelLoad]
         public static void BeforeLevelLoad()
         {
-#if DEBUG
-            Logger.EraseAll();
-            Logger.StartTimer();
-#endif
             LevelManager.RegisterBlockFactory(new ConveyorBlockFactory());
+
+            new Harmony("Mc__Ouille.ConveyorBlockMod").PatchAll();
         }
 
         /// <summary>
@@ -47,7 +47,6 @@ namespace ConveyorBlockMod
         [OnLevelEnd]
         public static void OnLevelEnd()
         {
-            // Your code here
         }
     }
 }
